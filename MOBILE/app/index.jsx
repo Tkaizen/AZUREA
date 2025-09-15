@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
-    alert(`Logged in with: ${email}`);
+    router.replace("/(tabs)/home")
   };
+
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
