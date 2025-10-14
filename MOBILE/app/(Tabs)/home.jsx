@@ -1,18 +1,113 @@
-import React from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  Alert,
+} from "react-native";
+import { useRouter } from "expo-router"; // ✅ added this import
 
-export function Home() {
+export default function Home() {
+  const router = useRouter(); // ✅ initialize router for navigation
+  const [activeTab, setActiveTab] = useState("Service");
+
+const cars = [
+  {
+    id: 1,
+    name: "Lamborghini Aventador",
+    price: "$40 / Hours",
+    image: require("../../assets/images/aventador.jpg"),
+    link: "/(info)/aventador",
+  },
+  {
+    id: 2,
+    name: "Honda City",
+    price: "$28 / Hours",
+    image: require("../../assets/images/honda-city.jpg"),
+    link: "/(info)/city",
+  },
+  {
+    id: 3,
+    name: "Lamborghini Huracan",
+    price: "$45 / Hours",
+    image: require("../../assets/images/Huracan.jpg"),
+    link: "/(info)/huracan",
+  },
+  {
+    id: 4,
+    name: "Honda Accord",
+    price: "$38 / Hours",
+    image: require("../../assets/images/accord.jpg"),
+    link: "/(info)/accord",
+  },
+  {
+    id: 5,
+    name: "Ferrari 488 Spider",
+    price: "$55 / Hours",
+    image: require("../../assets/images/ferrari.jpg"),
+    link: "/(info)/ferrari",
+  },
+  {
+    id: 6,
+    name: "Tesla Model S",
+    price: "$50 / Hours",
+    image: require("../../assets/images/tesla.jpg"),
+    link: "/(info)/tesla",
+  },
+  {
+    id: 7,
+    name: "BMW M4",
+    price: "$42 / Hours",
+    image: require("../../assets/images/bmw.jpg"),
+    link: "/(info)/bmw",
+  },
+  {
+    id: 8,
+    name: "Audi R8",
+    price: "$48 / Hours",
+    image: require("../../assets/images/audi.jpg"),
+    link: "/(info)/audi",
+  },
+  {
+    id: 9,
+    name: "Toyota Supra",
+    price: "$37 / Hours",
+    image: require("../../assets/images/supra.jpg"),
+    link: "/(info)/supra",
+  },
+  {
+    id: 10,
+    name: "Nissan GTR R35",
+    price: "$46 / Hours",
+    image: require("../../assets/images/gtr.jpg"),
+    link: "/(info)/nissan",
+  },
+];
+
+
+  const handleCarPress = (car) => {
+    if (car.link) {
+      router.push(car.link); // ✅ goes to Aventador info page
+    } else {
+      Alert.alert("Car Selected", `${car.name}\nPrice: ${car.price}`);
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Image
-          source={{ uri: "https://i.pravatar.cc/10" }}
+          source={{ uri: "https://i.pravatar.cc/100" }}
           style={styles.avatar}
         />
         <View>
           <Text style={styles.welcome}>Welcome!</Text>
-          <Text style={styles.username}>STEVE DRYLLE SARINO</Text>
+          <Text style={styles.username}>USER</Text>
         </View>
       </View>
 
@@ -30,7 +125,7 @@ export function Home() {
         <Text style={styles.promoTitle}>Get Special Discount</Text>
         <Text style={styles.promoSubtitle}>50% Only Today</Text>
         <Text style={styles.promoText}>
-          Lorem ipsum dolor sit amet, Duis sit non nunc.
+          For First 100 Customer Only, Buy Now.
         </Text>
         <TouchableOpacity style={styles.promoButton}>
           <Text style={styles.promoButtonText}>Get Now</Text>
@@ -39,42 +134,46 @@ export function Home() {
 
       {/* Category Tabs */}
       <View style={styles.categories}>
-        <TouchableOpacity style={styles.categoryActive}>
-          <Text style={styles.categoryActiveText}>Service</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.category}>
-          <Text style={styles.categoryText}>Rent</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.category}>
-          <Text style={styles.categoryText}>Selling</Text>
-        </TouchableOpacity>
+        {["Service", "Rent", "Selling"].map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            style={[
+              styles.category,
+              activeTab === tab && styles.categoryActive,
+            ]}
+            onPress={() => setActiveTab(tab)}
+          >
+            <Text
+              style={[
+                styles.categoryText,
+                activeTab === tab && styles.categoryActiveText,
+              ]}
+            >
+              {tab}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      {/* Cars */}
+      {/* Cars Section */}
       <View style={styles.cars}>
-        <View style={styles.carCard}>
-          <Image
-            source={{ uri: "" }}
-            style={styles.carImage}
-          />
-          <Text style={styles.carName}>Lamborghini</Text>
-          <Text style={styles.carPrice}>$40 / Hours</Text>
-        </View>
-
-        <View style={styles.carCard}>
-          <Image
-            source={{ uri: "" }}
-            style={styles.carImage}
-          />
-          <Text style={styles.carName}>Honda Cityzan</Text>
-          <Text style={styles.carPrice}>$70 / Hours</Text>
-        </View>
+        {cars.map((car) => (
+          <TouchableOpacity
+            key={car.id}
+            style={styles.carCard}
+            onPress={() => handleCarPress(car)}
+          >
+            <Image source={car.image} style={styles.carImage} />
+            <Text style={styles.carName}>{car.name}</Text>
+            <Text style={styles.carPrice}>{car.price}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
+
+      <View style={{ height: 40 }} />
     </ScrollView>
   );
 }
-
-export default Home;
 
 const styles = StyleSheet.create({
   container: {
@@ -160,9 +259,6 @@ const styles = StyleSheet.create({
   },
   categoryActive: {
     backgroundColor: "#fff",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
   },
   categoryActiveText: {
     color: "#1b263b",
@@ -170,6 +266,7 @@ const styles = StyleSheet.create({
   },
   cars: {
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-between",
   },
   carCard: {
@@ -177,6 +274,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 10,
     width: "48%",
+    marginBottom: 12,
   },
   carImage: {
     width: "100%",

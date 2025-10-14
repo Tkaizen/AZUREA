@@ -34,8 +34,8 @@ export function Profile() {
           source={{ uri: "https://via.placeholder.com/100x100.png?text=User" }}
           style={styles.avatar}
         />
-        <Text style={styles.name}>STEVE DRYLLE SARINO</Text>
-        <Text style={styles.email}>GWAPOKO@gmial.com</Text>
+        <Text style={styles.name}>USER</Text>
+        <Text style={styles.email}>example@gmail.com</Text>
       </View>
 
       {/* Menu Items */}

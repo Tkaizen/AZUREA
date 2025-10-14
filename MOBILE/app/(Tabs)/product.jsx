@@ -2,22 +2,72 @@ import React from "react";
 import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from "react-native";
 
 const cars = [
-  { id: "1", name: "Toyota Corolla", price: "$30 / day", img: "https://via.placeholder.com/150x100.png?text=Toyota+Corolla" },
-  { id: "2", name: "Honda Civic", price: "$35 / day", img: "https://via.placeholder.com/150x100.png?text=Honda+Civic" },
-  { id: "3", name: "Ford Focus", price: "$28 / day", img: "https://via.placeholder.com/150x100.png?text=Ford+Focus" },
-  { id: "4", name: "Hyundai Elantra", price: "$32 / day", img: "https://via.placeholder.com/150x100.png?text=Hyundai+Elantra" },
-  { id: "5", name: "Nissan Sentra", price: "$27 / day", img: "https://via.placeholder.com/150x100.png?text=Nissan+Sentra" },
-  { id: "6", name: "Chevrolet Malibu", price: "$40 / day", img: "https://via.placeholder.com/150x100.png?text=Chevy+Malibu" },
-  { id: "7", name: "Kia Forte", price: "$29 / day", img: "https://via.placeholder.com/150x100.png?text=Kia+Forte" },
-  { id: "8", name: "Volkswagen Jetta", price: "$36 / day", img: "https://via.placeholder.com/150x100.png?text=VW+Jetta" },
-  { id: "9", name: "Mazda 3", price: "$31 / day", img: "https://via.placeholder.com/150x100.png?text=Mazda+3" },
-  { id: "10", name: "Subaru Impreza", price: "$34 / day", img: "https://via.placeholder.com/150x100.png?text=Subaru+Impreza" },
+  {
+    id: 1,
+    name: "Lamborghini Aventador",
+    price: "$40 / Hours",
+    image: require("../../assets/images/aventador.jpg"),
+  },
+  {
+    id: 2,
+    name: "Honda City",
+    price: "$28 / Hours",
+    image: require("../../assets/images/honda-city.jpg"),
+  },
+  {
+    id: 3,
+    name: "Lamborghini Huracan",
+    price: "$45 / Hours",
+    image: require("../../assets/images/Huracan.jpg"), // case-sensitive!
+  },
+  {
+    id: 4,
+    name: "Honda Accord",
+    price: "$38 / Hours",
+    image: require("../../assets/images/accord.jpg"),
+  },
+  {
+    id: 5,
+    name: "Ferrari 488 Spider",
+    price: "$55 / Hours",
+    image: require("../../assets/images/ferrari.jpg"),
+  },
+  {
+    id: 6,
+    name: "Tesla Model S",
+    price: "$50 / Hours",
+    image: require("../../assets/images/tesla.jpg"),
+  },
+  {
+    id: 7,
+    name: "BMW M4",
+    price: "$42 / Hours",
+    image: require("../../assets/images/bmw.jpg"),
+  },
+  {
+    id: 8,
+    name: "Audi R8",
+    price: "$48 / Hours",
+    image: require("../../assets/images/audi.jpg"),
+  },
+  {
+    id: 9,
+    name: "Toyota Supra",
+    price: "$37 / Hours",
+    image: require("../../assets/images/supra.jpg"),
+  },
+  {
+    id: 10,
+    name: "Nissan GTR R35",
+    price: "$46 / Hours",
+    image: require("../../assets/images/gtr.jpg"),
+  },
 ];
 
 export function Product() {
   const renderCar = ({ item }) => (
     <View style={styles.card}>
-      <Image source={{ uri: item.img }} style={styles.image} />
+      <Image source={item.image} style={styles.image} />
       <View style={styles.cardText}>
         <Text style={styles.carName}>{item.name}</Text>
         <Text style={styles.carPrice}>{item.price}</Text>
@@ -34,7 +84,8 @@ export function Product() {
       <FlatList
         data={cars}
         renderItem={renderCar}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
@@ -45,56 +96,57 @@ export default Product;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0d1b2a", // dark background
-    padding: 15,
+    backgroundColor: "#0A122A", // dark navy background
+    padding: 16,
   },
   header: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 15,
+    color: "#FFFFFF",
     textAlign: "center",
+    marginBottom: 20,
   },
   card: {
-    backgroundColor: "#1b263b",
+    flexDirection: "row",
+    backgroundColor: "#1C2541",
     borderRadius: 12,
     marginBottom: 15,
-    overflow: "hidden",
-    flexDirection: "row",
+    padding: 8,
     shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+    alignItems: "center",
   },
   image: {
-    width: 120,
-    height: 90,
+    width: 100,
+    height: 70,
+    borderRadius: 8,
+    marginRight: 12,
   },
   cardText: {
     flex: 1,
-    padding: 10,
-    justifyContent: "center",
   },
   carName: {
-    fontSize: 16,
+    color: "#FFFFFF",
+    fontSize: 15,
     fontWeight: "bold",
-    color: "#fff",
   },
   carPrice: {
-    fontSize: 14,
-    color: "#bbb",
-    marginVertical: 5,
+    color: "#B0B8C3",
+    fontSize: 13,
+    marginVertical: 4,
   },
   button: {
-    marginTop: 5,
-    backgroundColor: "#1b4de4",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 8,
+    backgroundColor: "#1E4DFE",
+    borderRadius: 6,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     alignSelf: "flex-start",
   },
   buttonText: {
-    color: "#fff",
-    fontWeight: "600",
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontSize: 12,
   },
 });
