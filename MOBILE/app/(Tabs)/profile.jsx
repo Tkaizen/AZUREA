@@ -8,11 +8,12 @@ import {
   ScrollView,
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import { useRouter } from "expo-router"; // 👈 import for navigation
 
 // Reusable Menu Item Component
-function MenuItem({ icon, title }) {
+function MenuItem({ icon, title, onPress }) {
   return (
-    <TouchableOpacity style={styles.menuItem}>
+    <TouchableOpacity style={styles.menuItem} onPress={onPress}>
       <FontAwesome
         name={icon}
         size={20}
@@ -25,7 +26,9 @@ function MenuItem({ icon, title }) {
 }
 
 // Main Profile Screen
-export function Profile() {
+export default function Profile() {
+  const router = useRouter(); // 👈 initialize router
+
   return (
     <ScrollView style={styles.container}>
       {/* Profile Header */}
@@ -39,20 +42,29 @@ export function Profile() {
       </View>
 
       {/* Menu Items */}
-      
       <View style={styles.menu}>
-        <MenuItem icon="car" title="My Bookings" />
+        <MenuItem icon="car" title="My Bookings" onPress={() => router.push("/prof/booking")} />
+
         <MenuItem icon="heart" title="Favorites" />
         <MenuItem icon="credit-card" title="Payment Methods" />
-        <MenuItem icon="cog" title="Settings" />
-        <MenuItem icon="info-circle" title="Help & Support" />
+        
+        {/* 👇 Navigate to Settings when pressed */}
+        <MenuItem
+          icon="cog"
+          title="Settings"
+          onPress={() => router.push("/prof/setting")}
+        />
+        <MenuItem
+            icon="info-circle"
+            title="Help & Support"
+            onPress={() => router.push("/prof/help")}
+            />
+
         <MenuItem icon="sign-out" title="Logout" />
       </View>
     </ScrollView>
   );
 }
-
-export default Profile;
 
 const styles = StyleSheet.create({
   container: {
