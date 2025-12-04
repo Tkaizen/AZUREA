@@ -21,7 +21,7 @@ router.post("/register", async (req, res) => {
         }
 
         const existentEmail = await User.findOne({ email });
-        if (existentEmail) {
+        if (existentEmail){
             return res.status(400).json({ message: "Email already in use" });
         }
 
@@ -61,8 +61,29 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
 
-    res.json({ message: "User logged in" });
+   try {
+    const { username, password } = req.body;
 
+        if (!username || !password)return res.status(400).json({ message: "All fields are required" });
+
+        const user = await User.findOne({username});
+        if (!user) return res.status(400).json({ message: "Invalid credentials" });
+
+        const isPasswordCorrect = await user.comparePassword(password);
+        if (!isPasswordCorrect) return res.status(400).json({ message: "Invalid credentials" });
+
+        const token = generateToken(user._id);
+        res.status(200).json({
+            token,
+            _id: user._id,
+            username: user.username,
+            email: user.email
+        });
+
+   } catch (error) {
+        console.log("Error during user login:", error);
+        return res.status(500).json({message: "Internal Server Error" });
+   }
 });
 
 export default router;
