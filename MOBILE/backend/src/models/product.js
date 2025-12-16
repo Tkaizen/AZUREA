@@ -1,24 +1,39 @@
+// models/product.js
+
 import mongoose from 'mongoose';
-import { use } from 'react';
 
 const productSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
+        trim: true
+    },
+    category: {
+        type: String,
+        required: true,
+
+        default: 'Cars'
+    },
+    description: {
+        type: String,
+        default: ""
     },
     price: {
-        type: number,
+        type: Number,
         required: true,
+    },
+    unit: {
+        type: String,
+
+        default: 'hour'
     },
     image: {
         type: String,
-        required: true
-    },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+        default: ""
     }
-},   {timestamps: true} );
+}, {
+    timestamps: true
+});
 
-export default mongoose.model('Product', productSchema);
+
+export default mongoose.models.Product || mongoose.model('Product', productSchema);

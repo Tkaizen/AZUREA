@@ -1,14 +1,9 @@
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
+import { View, Text, StyleSheet, Image, TouchableOpacity, Switch, Alert, ScrollView } from "react-native";
+import { useRouter } from "expo-router";
+import { AuthContext } from "../context/AuthContext";
 import { useRouter } from "expo-router"; // 👈 import for navigation
+import React, { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 // Reusable Menu Item Component
 function MenuItem({ icon, title, onPress }) {
@@ -28,26 +23,32 @@ function MenuItem({ icon, title, onPress }) {
 // Main Profile Screen
 export default function Profile() {
   const router = useRouter(); // 👈 initialize router
+  const { user, logout } = useContext(AuthContext);
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/");
+  };
 
   return (
     <ScrollView style={styles.container}>
       {/* Profile Header */}
       <View style={styles.header}>
         <Image
-          source={{ uri: "https://via.placeholder.com/100x100.png?text=User" }}
+          source={{ uri: user?.avatar || "https://i.pravatar.cc/100" }}
           style={styles.avatar}
         />
-        <Text style={styles.name}>USER</Text>
-        <Text style={styles.email}>example@gmail.com</Text>
+        <Text style={styles.name}>{user?.username || "USER"}</Text>
+        <Text style={styles.email}>{user?.email || "example@gmail.com"}</Text>
       </View>
 
       {/* Menu Items */}
       <View style={styles.menu}>
         <MenuItem icon="car" title="My Bookings" onPress={() => router.push("/prof/booking")} />
 
-        <MenuItem icon="heart" title="Favorites" />
+        <MenuItem icon="heart" title="Favorites" onPress={() => router.push("/prof/favorites")} />
         <MenuItem icon="credit-card" title="Payment Methods" />
-        
+
         {/* 👇 Navigate to Settings when pressed */}
         <MenuItem
           icon="cog"
@@ -55,12 +56,12 @@ export default function Profile() {
           onPress={() => router.push("/prof/setting")}
         />
         <MenuItem
-            icon="info-circle"
-            title="Help & Support"
-            onPress={() => router.push("/prof/help")}
-            />
+          icon="info-circle"
+          title="Help & Support"
+          onPress={() => router.push("/prof/help")}
+        />
 
-        <MenuItem icon="sign-out" title="Logout" />
+        <MenuItem icon="sign-out" title="Logout" onPress={handleLogout} />
       </View>
     </ScrollView>
   );

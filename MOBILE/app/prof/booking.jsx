@@ -6,35 +6,51 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons"; // ✅ for the arrow icon
-
-const bookings = [
-  {
-    id: "1",
-    carName: "accord",
-    date: "Oct 10, 2025",
-    price: "$40 / day",
-    image: require("../../assets/images/accord.jpg"),
-  },
-  {
-    id: "2",
-    carName: "supra",
-    date: "Oct 12, 2025",
-    price: "$45 / day",
-    image: require("../../assets/images/supra.jpg"),
-  },
-  {
-    id: "3",
-    carName: "aventador",
-    date: "Oct 20, 2025",
-    price: "$90 / day",
-    image: require("../../assets/images/aventador.jpg"),
-  },
-];
+import { Ionicons } from "@expo/vector-icons";
+import { useBookings } from "../../context/BookingsContext";
+import { carData } from "../../data/carData";
 
 export default function Booking() {
+  const { bookings, removeBooking } = useBookings();
+
+  const handleDone = (id) => {
+    Alert.alert(
+      "Complete Booking",
+      "Are you sure you want to mark this booking as done?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Yes",
+          onPress: () => removeBooking(id)
+        }
+      ]
+    );
+  };
+
+  const getCarDetails = (item) => {
+    // 1. Try explicit carId
+    if (item.carId && carData[item.carId]) {
+      return { ...carData[item.carId], id: item.carId };
+    }
+
+    // 2. Fallback: try mapping lowercase name to ID
+    const lowerId = item.carName?.toLowerCase();
+    if (lowerId && carData[lowerId]) {
+      return { ...carData[lowerId], id: lowerId };
+    }
+
+    // 3. Last resort: return DB data as-is (might have broken image)
+    return {
+      name: item.carName,
+      image: null,
+      price: item.price,
+      id: lowerId
+    };
+  };
+
   return (
     <View style={styles.container}>
       {/* ✅ Back arrow header */}
@@ -45,29 +61,52 @@ export default function Booking() {
         <Text style={styles.header}>My Bookings</Text>
       </View>
 
-      <FlatList
-        data={bookings}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Image source={item.image} style={styles.image} />
-            <View style={styles.details}>
-              <Text style={styles.carName}>{item.carName}</Text>
-              <Text style={styles.date}>📅 {item.date}</Text>
-              <Text style={styles.price}>{item.price}</Text>
+      {bookings.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No bookings yet.</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={bookings}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => {
+            const carDetails = getCarDetails(item);
 
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() =>
-                  router.push(`/(info)/${item.carName.toLowerCase()}`)
-                }
-              >
-                <Text style={styles.buttonText}>View Details</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-      />
+            return (
+              <View style={styles.card}>
+                {carDetails.image ? (
+                  <Image source={carDetails.image} style={styles.image} resizeMode="cover" />
+                ) : (
+                  <View style={[styles.image, { backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' }]}>
+                    <Ionicons name="car-sport" size={40} color="#666" />
+                  </View>
+                )}
+                <View style={styles.details}>
+                  <Text style={styles.carName}>{carDetails.name || item.carName}</Text>
+                  <Text style={styles.date}>📅 {item.date}</Text>
+                  <Text style={styles.price}>{carDetails.price || item.price}</Text>
+
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={styles.viewButton}
+                      onPress={() => router.push(`/(info)/${carDetails.id}`)}
+                    >
+                      <Text style={styles.buttonText}>Details</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.doneButton}
+                      onPress={() => handleDone(item.id)}
+                    >
+                      <Text style={styles.buttonText}>Done</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            );
+          }}
+        />
+      )}
     </View>
   );
 }
@@ -106,7 +145,6 @@ const styles = StyleSheet.create({
     width: 110,
     height: 80,
     borderRadius: 12,
-    resizeMode: "cover",
   },
   details: {
     flex: 1,
@@ -118,28 +156,49 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#F3F4F6",
     textTransform: "capitalize",
+    marginBottom: 4,
   },
   date: {
     fontSize: 14,
     color: "#9CA3AF",
-    marginTop: 2,
+    marginBottom: 2,
   },
   price: {
     fontSize: 16,
     fontWeight: "600",
     color: "#60A5FA",
-    marginTop: 4,
+    marginBottom: 8,
   },
-  button: {
-    marginTop: 10,
+  buttonContainer: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  viewButton: {
+    flex: 1,
     backgroundColor: "#2563EB",
-    paddingVertical: 8,
+    paddingVertical: 6,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  doneButton: {
+    flex: 1,
+    backgroundColor: "#10B981", // Green color for Done
+    paddingVertical: 6,
     borderRadius: 8,
     alignItems: "center",
   },
   buttonText: {
     color: "#fff",
     fontWeight: "600",
-    fontSize: 15,
+    fontSize: 14,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    color: "#9CA3AF",
+    fontSize: 18,
   },
 });

@@ -2,92 +2,117 @@ import React from "react";
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useFavorites } from "../context/FavoritesContext";
 
 export default function Accord() {
   const router = useRouter();
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const carId = "accord";
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons name="heart-outline" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Car Image */}
-      <Image
-        source={require("../../assets/images/accord.jpg")}
-        style={styles.image}
-      />
-
-      {/* Car Details */}
-      <View style={styles.detailsContainer}>
-        <Text style={styles.carName}>Honda Accord</Text>
-        <View style={styles.rating}>
-          <Ionicons name="star" size={18} color="#FFD700" />
-          <Text style={styles.ratingText}>4.7 (2.1k reviews)</Text>
+    <View style={styles.outerContainer}>
+      <ScrollView style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => toggleFavorite(carId)}>
+            <Ionicons
+              name={isFavorite(carId) ? "heart" : "heart-outline"}
+              size={24}
+              color={isFavorite(carId) ? "red" : "#fff"}
+            />
+          </TouchableOpacity>
         </View>
 
-        {/* Specifications */}
-        <Text style={styles.sectionTitle}>Specifications</Text>
-        <View style={styles.specContainer}>
-          <View style={styles.specBox}>
-            <Ionicons name="person" size={28} color="#33CC66" />
-            <Text style={styles.specLabel}>Seats</Text>
-            <Text style={styles.specValue}>5</Text>
-          </View>
-          <View style={styles.specBox}>
-            <Ionicons name="speedometer" size={28} color="#33CC66" />
-            <Text style={styles.specLabel}>Type</Text>
-            <Text style={styles.specValue}>Automatic</Text>
-          </View>
-          <View style={styles.specBox}>
-            <Ionicons name="flame" size={28} color="#33CC66" />
-            <Text style={styles.specLabel}>Fuel</Text>
-            <Text style={styles.specValue}>Gasoline</Text>
-          </View>
-        </View>
+        {/* Car Image */}
+        <Image
+          source={require("../../assets/images/accord.jpg")}
+          style={styles.image}
+        />
 
-        {/* Centered Logo */}
-        <View style={styles.logoWrapper}>
-          <Image
-            source={{ uri: "https://upload.wikimedia.org/wikipedia/en/7/7b/Honda_logo.svg" }}
-            style={styles.logo}
-          />
-        </View>
-
-        {/* Description */}
-        <Text style={styles.sectionTitle}>Description</Text>
-        <Text style={styles.description}>
-          The Honda Accord blends comfort, performance, and efficiency into one refined package. 
-          With its spacious interior, modern technology, and smooth handling, the Accord is perfect 
-          for both daily commutes and long drives.
-        </Text>
-
-        {/* Features */}
-        <Text style={styles.sectionTitle}>Features</Text>
-        <View style={styles.features}>
-          <View>
-            <Text style={styles.feature}>• Adaptive Cruise Control</Text>
-            <Text style={styles.feature}>• Lane Keeping Assist</Text>
-            <Text style={styles.feature}>• Dual-Zone Climate Control</Text>
+        {/* Car Details */}
+        <View style={styles.detailsContainer}>
+          <Text style={styles.carName}>Honda Accord</Text>
+          <View style={styles.rating}>
+            <Ionicons name="star" size={18} color="#FFD700" />
+            <Text style={styles.ratingText}>4.7 (2.1k reviews)</Text>
           </View>
-          <View>
-            <Text style={styles.feature}>• Touchscreen Display</Text>
-            <Text style={styles.feature}>• Apple CarPlay / Android Auto</Text>
-            <Text style={styles.feature}>• Premium Audio System</Text>
+
+          {/* Specifications */}
+          <Text style={styles.sectionTitle}>Specifications</Text>
+          <View style={styles.specContainer}>
+            <View style={styles.specBox}>
+              <Ionicons name="person" size={28} color="#33CC66" />
+              <Text style={styles.specLabel}>Seats</Text>
+              <Text style={styles.specValue}>5</Text>
+            </View>
+            <View style={styles.specBox}>
+              <Ionicons name="speedometer" size={28} color="#33CC66" />
+              <Text style={styles.specLabel}>Type</Text>
+              <Text style={styles.specValue}>Automatic</Text>
+            </View>
+            <View style={styles.specBox}>
+              <Ionicons name="flame" size={28} color="#33CC66" />
+              <Text style={styles.specLabel}>Fuel</Text>
+              <Text style={styles.specValue}>Gasoline</Text>
+            </View>
           </View>
+
+          {/* Centered Logo */}
+          <View style={styles.logoWrapper}>
+            <Image
+              source={{ uri: "https://upload.wikimedia.org/wikipedia/en/7/7b/Honda_logo.svg" }}
+              style={styles.logo}
+            />
+          </View>
+
+          {/* Description */}
+          <Text style={styles.sectionTitle}>Description</Text>
+          <Text style={styles.description}>
+            The Honda Accord blends comfort, performance, and efficiency into one refined package.
+            With its spacious interior, modern technology, and smooth handling, the Accord is perfect
+            for both daily commutes and long drives.
+          </Text>
+
+          {/* Features */}
+          <Text style={styles.sectionTitle}>Features</Text>
+          <View style={styles.features}>
+            <View>
+              <Text style={styles.feature}>• Adaptive Cruise Control</Text>
+              <Text style={styles.feature}>• Lane Keeping Assist</Text>
+              <Text style={styles.feature}>• Dual-Zone Climate Control</Text>
+            </View>
+            <View>
+              <Text style={styles.feature}>• Touchscreen Display</Text>
+              <Text style={styles.feature}>• Apple CarPlay / Android Auto</Text>
+              <Text style={styles.feature}>• Premium Audio System</Text>
+            </View>
+          </View>
+
+          {/* Padding to prevent content from being hidden by the fixed button */}
+          <View style={{ height: 100 }} />
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+
+      {/* FLOATING BOOK NOW BUTTON */}
+      <TouchableOpacity
+        style={styles.bookNowButton}
+        onPress={() => router.push("/book/accord")} // Navigate to the booking screen for the Accord
+      >
+        <Text style={styles.bookNowText}>Book Now</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  // New style for the outer wrapper to allow absolute positioning
+  outerContainer: {
+    flex: 1,
+    backgroundColor: "#0B1622",
+  },
   container: { flex: 1, backgroundColor: "#0B1622" },
   header: {
     flexDirection: "row",
@@ -164,5 +189,22 @@ const styles = StyleSheet.create({
   feature: {
     color: "#ccc",
     marginVertical: 3,
+  },
+  // --- NEW STYLES FOR FLOATING BUTTON ---
+  bookNowButton: {
+    position: "absolute",
+    bottom: 25,
+    left: 20,
+    right: 20,
+    backgroundColor: "#00BFFF", // Blue color
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    zIndex: 10, // Ensure it floats above the ScrollView content
+  },
+  bookNowText: {
+    color: "#0B1622", // Dark text color for contrast
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });

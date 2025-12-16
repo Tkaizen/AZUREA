@@ -2,77 +2,98 @@ import React from "react";
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useFavorites } from "../context/FavoritesContext";
 
 export default function Ferrari() {
   const router = useRouter();
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const carId = "ferrari";
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons name="heart-outline" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
-
-      <Image source={require("../../assets/images/ferrari.jpg")} style={styles.image} />
-
-      <View style={styles.detailsContainer}>
-        <Text style={styles.carName}>Ferrari 488 GTB</Text>
-        <View style={styles.rating}>
-          <Ionicons name="star" size={18} color="#FFD700" />
-          <Text style={styles.ratingText}>4.8 (1.9k reviews)</Text>
+    <View style={styles.outerContainer}>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => toggleFavorite(carId)}>
+            <Ionicons
+              name={isFavorite(carId) ? "heart" : "heart-outline"}
+              size={24}
+              color={isFavorite(carId) ? "red" : "#fff"}
+            />
+          </TouchableOpacity>
         </View>
 
-        <Text style={styles.sectionTitle}>Specifications</Text>
-        <View style={styles.specContainer}>
-          <View style={styles.specBox}>
-            <Ionicons name="person" size={28} color="#FF0000" />
-            <Text style={styles.specLabel}>Seats</Text>
-            <Text style={styles.specValue}>2</Text>
+        <Image source={require("../../assets/images/ferrari.jpg")} style={styles.image} />
+
+        <View style={styles.detailsContainer}>
+          <Text style={styles.carName}>Ferrari 488 GTB</Text>
+          <View style={styles.rating}>
+            <Ionicons name="star" size={18} color="#FFD700" />
+            <Text style={styles.ratingText}>4.8 (1.9k reviews)</Text>
           </View>
-          <View style={styles.specBox}>
-            <Ionicons name="speedometer" size={28} color="#FF0000" />
-            <Text style={styles.specLabel}>Type</Text>
-            <Text style={styles.specValue}>Automatic</Text>
+
+          <Text style={styles.sectionTitle}>Specifications</Text>
+          <View style={styles.specContainer}>
+            <View style={styles.specBox}>
+              <Ionicons name="person" size={28} color="#FF0000" />
+              <Text style={styles.specLabel}>Seats</Text>
+              <Text style={styles.specValue}>2</Text>
+            </View>
+            <View style={styles.specBox}>
+              <Ionicons name="speedometer" size={28} color="#FF0000" />
+              <Text style={styles.specLabel}>Type</Text>
+              <Text style={styles.specValue}>Automatic</Text>
+            </View>
+            <View style={styles.specBox}>
+              <Ionicons name="flame" size={28} color="#FF0000" />
+              <Text style={styles.specLabel}>Fuel</Text>
+              <Text style={styles.specValue}>Gasoline</Text>
+            </View>
           </View>
-          <View style={styles.specBox}>
-            <Ionicons name="flame" size={28} color="#FF0000" />
-            <Text style={styles.specLabel}>Fuel</Text>
-            <Text style={styles.specValue}>Gasoline</Text>
+
+          <View style={styles.logoWrapper}>
+            <Image source={{ uri: "https://upload.wikimedia.org/wikipedia/en/d/d4/Ferrari-Logo.svg" }} style={styles.logo} />
+          </View>
+
+          <Text style={styles.sectionTitle}>Description</Text>
+          <Text style={styles.description}>
+            The Ferrari 488 GTB delivers breathtaking performance and elegance. Designed for those who crave speed and precision,
+            this car defines Italian craftsmanship and power.
+          </Text>
+
+          <Text style={styles.sectionTitle}>Features</Text>
+          <View style={styles.features}>
+            <View>
+              <Text style={styles.feature}>• GPS Navigation</Text>
+              <Text style={styles.feature}>• Sports Mode</Text>
+              <Text style={styles.feature}>• Dual Exhaust</Text>
+            </View>
+            <View>
+              <Text style={styles.feature}>• Paddle Shifters</Text>
+              <Text style={styles.feature}>• Premium Sound</Text>
+              <Text style={styles.feature}>• Leather Seats</Text>
+            </View>
           </View>
         </View>
+      </ScrollView>
 
-        <View style={styles.logoWrapper}>
-          <Image source={{ uri: "https://upload.wikimedia.org/wikipedia/en/d/d4/Ferrari-Logo.svg" }} style={styles.logo} />
-        </View>
-
-        <Text style={styles.sectionTitle}>Description</Text>
-        <Text style={styles.description}>
-          The Ferrari 488 GTB delivers breathtaking performance and elegance. Designed for those who crave speed and precision,
-          this car defines Italian craftsmanship and power.
-        </Text>
-
-        <Text style={styles.sectionTitle}>Features</Text>
-        <View style={styles.features}>
-          <View>
-            <Text style={styles.feature}>• GPS Navigation</Text>
-            <Text style={styles.feature}>• Sports Mode</Text>
-            <Text style={styles.feature}>• Dual Exhaust</Text>
-          </View>
-          <View>
-            <Text style={styles.feature}>• Paddle Shifters</Text>
-            <Text style={styles.feature}>• Premium Sound</Text>
-            <Text style={styles.feature}>• Leather Seats</Text>
-          </View>
-        </View>
-      </View>
-    </ScrollView>
+      {/* FLOATING BOOK NOW BUTTON */}
+      <TouchableOpacity
+        style={styles.bookNowButton}
+        onPress={() => router.push("/book/ferrari")}
+      >
+        <Text style={styles.bookNowText}>Book Now</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 const styles = StyleSheet.create({
+  outerContainer: {
+    flex: 1,
+    backgroundColor: "#0B1622",
+  },
   container: {
     flex: 1,
     backgroundColor: "#0B1622",
@@ -152,6 +173,22 @@ const styles = StyleSheet.create({
   feature: {
     color: "#ccc",
     marginVertical: 3,
+  },
+  bookNowButton: {
+    position: "absolute",
+    bottom: 25,
+    left: 20,
+    right: 20,
+    backgroundColor: "#00BFFF",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    zIndex: 10,
+  },
+  bookNowText: {
+    color: "#0B1622",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 

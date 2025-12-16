@@ -1,6 +1,9 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { useState } from "react";
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
+
+import { useRouter } from "expo-router";
+import { register } from "../services/api";
 
 export default function RegistrationScreen() {
   const [name, setName] = useState("");
@@ -8,9 +11,21 @@ export default function RegistrationScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [referral, setReferral] = useState("");
+  const router = useRouter();
 
-  const handleSignUp = () => {
-    alert(`Registered: ${name}, ${email}`);
+  const handleSignUp = async () => {
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    try {
+      await register({ username: name, email, password });
+      alert("Registration Successful! Please login.");
+      router.back(); // Go back to login screen
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (
@@ -26,7 +41,7 @@ export default function RegistrationScreen() {
         <Icon name="user" size={18} color="#ccc" style={styles.icon} />
         <TextInput
           style={styles.input}
-          placeholder="Name"
+          placeholder="Username"
           placeholderTextColor="#aaa"
           value={name}
           onChangeText={setName}

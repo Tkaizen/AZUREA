@@ -1,92 +1,293 @@
-import React from "react";
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from "react-native";
+import React, { useState, useEffect, useContext } from "react";
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Modal, TextInput, Alert, ActivityIndicator } from "react-native";
+import { useRouter } from "expo-router";
+import { AuthContext } from "../context/AuthContext";
+import { getProducts, createProduct, deleteProduct, updateProduct } from "../services/api";
 
-const cars = [
-  {
-    id: 1,
-    name: "Lamborghini Aventador",
-    price: "$40 / Hours",
-    image: require("../../assets/images/aventador.jpg"),
-  },
-  {
-    id: 2,
-    name: "Honda City",
-    price: "$28 / Hours",
-    image: require("../../assets/images/honda-city.jpg"),
-  },
-  {
-    id: 3,
-    name: "Lamborghini Huracan",
-    price: "$45 / Hours",
-    image: require("../../assets/images/Huracan.jpg"), // case-sensitive!
-  },
-  {
-    id: 4,
-    name: "Honda Accord",
-    price: "$38 / Hours",
-    image: require("../../assets/images/accord.jpg"),
-  },
-  {
-    id: 5,
-    name: "Ferrari 488 Spider",
-    price: "$55 / Hours",
-    image: require("../../assets/images/ferrari.jpg"),
-  },
-  {
-    id: 6,
-    name: "Tesla Model S",
-    price: "$50 / Hours",
-    image: require("../../assets/images/tesla.jpg"),
-  },
-  {
-    id: 7,
-    name: "BMW M4",
-    price: "$42 / Hours",
-    image: require("../../assets/images/bmw.jpg"),
-  },
-  {
-    id: 8,
-    name: "Audi R8",
-    price: "$48 / Hours",
-    image: require("../../assets/images/audi.jpg"),
-  },
-  {
-    id: 9,
-    name: "Toyota Supra",
-    price: "$37 / Hours",
-    image: require("../../assets/images/supra.jpg"),
-  },
-  {
-    id: 10,
-    name: "Nissan GTR R35",
-    price: "$46 / Hours",
-    image: require("../../assets/images/gtr.jpg"),
-  },
-];
+const DEFAULT_IMAGE = 'https://via.placeholder.com/150/0000FF/808080?text=No+Image';
 
 export function Product() {
-  const renderCar = ({ item }) => (
-    <View style={styles.card}>
-      <Image source={item.image} style={styles.image} />
-      <View style={styles.cardText}>
-        <Text style={styles.carName}>{item.name}</Text>
-        <Text style={styles.carPrice}>{item.price}</Text>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Rent Now</Text>
+  const { user } = useContext(AuthContext);
+  const router = useRouter();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentProductId, setCurrentProductId] = useState(null);
+
+  // Form state
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [image, setImage] = useState("");
+  const [category, setCategory] = useState("Cars");
+  const [description, setDescription] = useState("");
+  const [unit, setUnit] = useState("hour");
+
+  // Function to clear the form fields
+  const resetForm = () => {
+    setName("");
+    setPrice("");
+    setImage("");
+    setCategory("Cars");
+    setDescription("");
+    setUnit("hour");
+    setIsEditing(false);
+    setCurrentProductId(null);
+  };
+
+  useEffect(() => {
+    if (user?.token) {
+      fetchProducts();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const data = await getProducts(user?.token);
+      setProducts(data);
+    } catch (error) {
+      console.log("Error fetching products:", error.message);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!name || !price || !category) {
+      Alert.alert("Validation Error", "Please fill in Name, Price, and Category.");
+      return;
+    }
+
+    if (isNaN(parseFloat(price))) {
+      Alert.alert("Validation Error", "Price must be a valid number.");
+      return;
+    }
+
+    if (!user?.token) {
+      Alert.alert("Authentication Error", "You are not logged in. Please log in first.");
+      return;
+    }
+
+    try {
+      const productData = {
+        name,
+        price: parseFloat(price),
+        image,
+        category,
+        description,
+        unit
+      };
+
+      if (isEditing) {
+        const result = await updateProduct(currentProductId, productData, user?.token);
+        console.log("Product updated:", result);
+        Alert.alert("Success", `Product "${result.name}" updated successfully!`);
+      } else {
+        const result = await createProduct(productData, user?.token);
+        console.log("Product created:", result);
+        Alert.alert("Success", `Product "${result.name}" added successfully!`);
+      }
+
+      setModalVisible(false);
+      resetForm();
+      fetchProducts(); // Refresh list
+    } catch (error) {
+      console.error(isEditing ? "Update Error:" : "Create Error:", error.message);
+      Alert.alert("Error", `Failed to ${isEditing ? "update" : "add"} product: ${error.message}`);
+    }
+  };
+
+  const handleEditProduct = (item) => {
+    setName(item.name);
+    setPrice(item.price.toString());
+    setImage(item.image);
+    setCategory(item.category);
+    setDescription(item.description);
+    setUnit(item.unit || "hour");
+    setCurrentProductId(item._id);
+    setIsEditing(true);
+    setModalVisible(true);
+  };
+
+  // --- Rendering Functions ---
+
+  const handleDeleteProduct = async (id) => {
+    console.log("handleDeleteProduct called with ID:", id); // DEBUG LOG
+    Alert.alert(
+      "Confirm Delete",
+      "Are you sure you want to delete this product?",
+      [
+        { text: "Cancel", style: "cancel", onPress: () => console.log("Delete Cancelled") }, // DEBUG LOG
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            console.log("Delete Confirmed for ID:", id); // DEBUG LOG
+            try {
+              if (!user?.token) {
+                console.log("No token found"); // DEBUG LOG
+                Alert.alert("Error", "You must be logged in to delete products.");
+                return;
+              }
+              console.log("Calling deleteProduct API..."); // DEBUG LOG
+              await deleteProduct(id, user.token);
+              console.log("Delete Successful"); // DEBUG LOG
+              Alert.alert("Success", "Product deleted successfully");
+              fetchProducts(); // Refresh the list
+            } catch (error) {
+              console.error("Delete Error:", error);
+              Alert.alert("Error", `Failed to delete product: ${error.message}`);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const renderProductItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.productItem}
+      onPress={() => router.push(`/product/${item._id}`)}
+      activeOpacity={0.7}
+    >
+      <Image
+        source={{ uri: item.image || DEFAULT_IMAGE }}
+        style={styles.productImage}
+      />
+      <View style={styles.productInfo}>
+        <Text style={styles.productName}>{item.name}</Text>
+        <Text style={styles.productPrice}>${item.price} / {item.unit}</Text>
+        <Text style={styles.productCategory}>Category: {item.category}</Text>
+      </View>
+
+      <View style={styles.actionButtons}>
+        <TouchableOpacity
+          onPress={(e) => {
+            e.stopPropagation(); // Prevent navigating to details
+            handleEditProduct(item);
+          }}
+          style={[styles.iconButton, styles.editButton]}
+        >
+          <Text style={styles.iconButtonText}>✎</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={(e) => {
+            console.log("Delete button pressed for item:", item._id); // DEBUG LOG
+            e.stopPropagation(); // Prevent navigating to details
+            handleDeleteProduct(item._id);
+          }}
+          style={[styles.iconButton, styles.deleteButton]}
+        >
+          <Text style={styles.iconButtonText}>✖️</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
+
+  if (!user?.token) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.header}>Product Management</Text>
+        <Text style={styles.errorText}>Please log in to manage products.</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Available Cars</Text>
-      <FlatList
-        data={cars}
-        renderItem={renderCar}
-        keyExtractor={(item) => item.id.toString()}
-        showsVerticalScrollIndicator={false}
-      />
+      <Text style={styles.header}>Manage Products</Text>
+
+      {loading ? (
+        <ActivityIndicator size="large" color="#007bff" style={styles.loading} />
+      ) : products.length === 0 ? (
+        <Text style={styles.emptyText}>No cars available. Add one!</Text>
+      ) : (
+        <FlatList
+          data={products}
+          keyExtractor={(item) => item._id}
+          renderItem={renderProductItem}
+          contentContainerStyle={styles.listContent}
+        />
+      )}
+
+      {/* Floating Add Button */}
+      <TouchableOpacity
+        style={styles.floatingButton}
+        onPress={() => { resetForm(); setModalVisible(true); }}
+      >
+        <Text style={styles.floatingButtonText}>+</Text>
+      </TouchableOpacity>
+
+      {/* Create Product Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => { setModalVisible(false); resetForm(); }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>{isEditing ? "Edit Car" : "Add New Car"}</Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Tesla Model S"
+              placeholderTextColor="#999"
+              value={name}
+              onChangeText={setName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="120"
+              placeholderTextColor="#999"
+              value={price}
+              onChangeText={setPrice}
+              keyboardType="numeric"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="https://images.unsplash.co..."
+              placeholderTextColor="#999"
+              value={image}
+              onChangeText={setImage}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="hour"
+              placeholderTextColor="#999"
+              value={unit}
+              onChangeText={setUnit}
+            />
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="A luxury electric sedan with..."
+              placeholderTextColor="#999"
+              value={description}
+              onChangeText={setDescription}
+              multiline={true}
+            />
+
+            <View style={styles.buttonGroup}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.buttonCancel]}
+                onPress={() => { setModalVisible(false); resetForm(); }}
+              >
+                <Text style={styles.textStyle}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.buttonCreate]}
+                onPress={handleSubmit}
+              >
+                <Text style={styles.textStyle}>{isEditing ? "Save Changes" : "Add Car"}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -96,57 +297,172 @@ export default Product;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A122A", // dark navy background
-    padding: 16,
+    paddingTop: 50,
+    paddingHorizontal: 16,
+    backgroundColor: '#0d1b2a',
   },
   header: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#FFFFFF",
-    textAlign: "center",
+    fontSize: 28,
+    fontWeight: 'bold',
     marginBottom: 20,
+    color: '#fff',
+    textAlign: 'center',
   },
-  card: {
-    flexDirection: "row",
-    backgroundColor: "#1C2541",
+  emptyText: {
+    textAlign: 'center',
+    marginTop: 50,
+    fontSize: 16,
+    color: '#aaa',
+  },
+  errorText: {
+    textAlign: 'center',
+    marginTop: 50,
+    fontSize: 16,
+    color: '#ff6b6b',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingTop: 100,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: '#1b263b',
     borderRadius: 12,
+    padding: 30,
+    alignItems: 'stretch',
+    width: '90%',
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#fff',
+  },
+  input: {
+    height: 45,
+    backgroundColor: '#0d1b2a',
+    color: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 15,
     marginBottom: 15,
-    padding: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
-    alignItems: "center",
+    borderWidth: 0,
+    fontSize: 16,
   },
-  image: {
-    width: 100,
-    height: 70,
+  textArea: {
+    height: 80,
+    textAlignVertical: 'top',
+    paddingVertical: 10,
+  },
+  buttonGroup: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 10,
+  },
+  modalButton: {
     borderRadius: 8,
-    marginRight: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginLeft: 10,
   },
-  cardText: {
+  buttonCancel: {
+    backgroundColor: '#6c757d',
+  },
+  buttonCreate: {
+    backgroundColor: '#1b4de4',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: 16,
+  },
+  floatingButton: {
+    position: 'absolute',
+    width: 60,
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    right: 20,
+    bottom: 80,
+    backgroundColor: '#1b4de4',
+    borderRadius: 30,
+    elevation: 8,
+    zIndex: 10,
+  },
+  floatingButtonText: {
+    color: 'white',
+    fontSize: 30,
+    lineHeight: 30,
+  },
+  productItem: {
+    flexDirection: 'row',
+    padding: 15,
+    backgroundColor: '#1b263b',
+    borderRadius: 12,
+    marginBottom: 10,
+    alignItems: 'center',
+    elevation: 2,
+  },
+  productImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 15,
+    backgroundColor: '#0d1b2a',
+  },
+  productInfo: {
     flex: 1,
   },
-  carName: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "bold",
+  productName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
   },
-  carPrice: {
-    color: "#B0B8C3",
-    fontSize: 13,
-    marginVertical: 4,
+  productPrice: {
+    fontSize: 14,
+    color: '#aaa',
+    fontWeight: '600',
+    marginTop: 4,
   },
-  button: {
-    backgroundColor: "#1E4DFE",
-    borderRadius: 6,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    alignSelf: "flex-start",
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
+  productCategory: {
     fontSize: 12,
+    color: '#aaa',
+    marginTop: 2,
   },
+  actionButtons: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    paddingLeft: 10,
+    gap: 8,
+  },
+  iconButton: {
+    padding: 8,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 36,
+    height: 36,
+  },
+  editButton: {
+    backgroundColor: '#ffc107',
+  },
+  deleteButton: {
+    backgroundColor: '#dc3545',
+  },
+  iconButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  loading: {
+    marginTop: 50,
+  },
+  listContent: {
+    paddingBottom: 100,
+  }
 });

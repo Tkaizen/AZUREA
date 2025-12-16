@@ -1,99 +1,92 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  Alert,
-} from "react-native";
+import React, { useState, useContext } from "react";
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, TextInput, Alert } from "react-native";
 import { useRouter } from "expo-router"; // ✅ added this import
+import { AuthContext } from "../context/AuthContext";
 
 export default function Home() {
   const router = useRouter(); // ✅ initialize router for navigation
   const [activeTab, setActiveTab] = useState("Service");
+  const { user } = useContext(AuthContext);
 
-const cars = [
-  {
-    id: 1,
-    name: "Lamborghini Aventador",
-    price: "$40 / Hours",
-    image: require("../../assets/images/aventador.jpg"),
-    link: "/(info)/aventador",
-  },
-  {
-    id: 2,
-    name: "Honda City",
-    price: "$28 / Hours",
-    image: require("../../assets/images/honda-city.jpg"),
-    link: "/(info)/city",
-  },
-  {
-    id: 3,
-    name: "Lamborghini Huracan",
-    price: "$45 / Hours",
-    image: require("../../assets/images/Huracan.jpg"),
-    link: "/(info)/huracan",
-  },
-  {
-    id: 4,
-    name: "Honda Accord",
-    price: "$38 / Hours",
-    image: require("../../assets/images/accord.jpg"),
-    link: "/(info)/accord",
-  },
-  {
-    id: 5,
-    name: "Ferrari 488 Spider",
-    price: "$55 / Hours",
-    image: require("../../assets/images/ferrari.jpg"),
-    link: "/(info)/ferrari",
-  },
-  {
-    id: 6,
-    name: "Tesla Model S",
-    price: "$50 / Hours",
-    image: require("../../assets/images/tesla.jpg"),
-    link: "/(info)/tesla",
-  },
-  {
-    id: 7,
-    name: "BMW M4",
-    price: "$42 / Hours",
-    image: require("../../assets/images/bmw.jpg"),
-    link: "/(info)/bmw",
-  },
-  {
-    id: 8,
-    name: "Audi R8",
-    price: "$48 / Hours",
-    image: require("../../assets/images/audi.jpg"),
-    link: "/(info)/audi",
-  },
-  {
-    id: 9,
-    name: "Toyota Supra",
-    price: "$37 / Hours",
-    image: require("../../assets/images/supra.jpg"),
-    link: "/(info)/supra",
-  },
-  {
-    id: 10,
-    name: "Nissan GTR R35",
-    price: "$46 / Hours",
-    image: require("../../assets/images/gtr.jpg"),
-    link: "/(info)/nissan",
-  },
-];
+  const cars = [
+    {
+      id: 1,
+      name: "Lamborghini Aventador",
+      price: "$40 / Hours",
+      image: require("../../assets/images/aventador.jpg"),
+      link: "/(info)/aventador",
+    },
+    {
+      id: 2,
+      name: "Honda City",
+      price: "$28 / Hours",
+      image: require("../../assets/images/honda-city.jpg"),
+      link: "/(info)/city",
+    },
+    {
+      id: 3,
+      name: "Lamborghini Huracan",
+      price: "$45 / Hours",
+      image: require("../../assets/images/Huracan.jpg"),
+      link: "/(info)/huracan",
+    },
+    {
+      id: 4,
+      name: "Honda Accord",
+      price: "$38 / Hours",
+      image: require("../../assets/images/accord.jpg"),
+      link: "/(info)/accord",
+    },
+    {
+      id: 5,
+      name: "Ferrari 488 Spider",
+      price: "$55 / Hours",
+      image: require("../../assets/images/ferrari.jpg"),
+      link: "/(info)/ferrari",
+    },
+    {
+      id: 6,
+      name: "Tesla Model S",
+      price: "$50 / Hours",
+      image: require("../../assets/images/tesla.jpg"),
+      link: "/(info)/tesla",
+    },
+    {
+      id: 7,
+      name: "BMW M4",
+      price: "$42 / Hours",
+      image: require("../../assets/images/bmw.jpg"),
+      link: "/(info)/bmw",
+    },
+    {
+      id: 8,
+      name: "Audi R8",
+      price: "$48 / Hours",
+      image: require("../../assets/images/audi.jpg"),
+      link: "/(info)/audi",
+    },
+    {
+      id: 9,
+      name: "Toyota Supra",
+      price: "$37 / Hours",
+      image: require("../../assets/images/supra.jpg"),
+      link: "/(info)/supra",
+    },
+    {
+      id: 10,
+      name: "Nissan GTR R35",
+      price: "$46 / Hours",
+      image: require("../../assets/images/gtr.jpg"),
+      link: "/(info)/nissan",
+    },
+  ];
 
 
   const handleCarPress = (car) => {
     if (car.link) {
       router.push(car.link); // ✅ goes to Aventador info page
     } else {
-      Alert.alert("Car Selected", `${car.name}\nPrice: ${car.price}`);
+      Alert.alert("Car Selected", `${car.name} \nPrice: ${car.price} `);
     }
   };
 
@@ -102,12 +95,12 @@ const cars = [
       {/* Header */}
       <View style={styles.header}>
         <Image
-          source={{ uri: "https://i.pravatar.cc/100" }}
+          source={{ uri: user?.avatar || "https://i.pravatar.cc/100" }}
           style={styles.avatar}
         />
         <View>
           <Text style={styles.welcome}>Welcome!</Text>
-          <Text style={styles.username}>USER</Text>
+          <Text style={styles.username}>{user?.username || "USER"}</Text>
         </View>
       </View>
 
@@ -134,7 +127,7 @@ const cars = [
 
       {/* Category Tabs */}
       <View style={styles.categories}>
-        {["Service", "Rent", "Selling"].map((tab) => (
+        {["New Model", "Renting"].map((tab) => (
           <TouchableOpacity
             key={tab}
             style={[
