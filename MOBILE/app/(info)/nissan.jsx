@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useFavorites } from "../context/FavoritesContext";
+import { useFavorites } from "../../context/FavoritesContext";
 
 export default function Nissan() {
   const router = useRouter();
@@ -30,6 +30,7 @@ export default function Nissan() {
         <Image
           source={require("../../assets/images/gtr.jpg")}
           style={styles.image}
+          resizeMode="cover"
         />
 
         {/* Car Details */}
@@ -65,6 +66,7 @@ export default function Nissan() {
             <Image
               source={{ uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Nissan_logo.svg/512px-Nissan_logo.svg.png" }}
               style={styles.logo}
+              resizeMode="contain"
             />
           </View>
 
@@ -119,7 +121,6 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: 200,
-    resizeMode: "cover",
   },
   detailsContainer: {
     padding: 20,

@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useFavorites } from "../context/FavoritesContext";
+import { useFavorites } from "../../context/FavoritesContext";
 
 export default function Tesla() {
   const router = useRouter();

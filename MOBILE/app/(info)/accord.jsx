@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useFavorites } from "../context/FavoritesContext";
+import { useFavorites } from "../../context/FavoritesContext";
 
 export default function Accord() {
   const router = useRouter();
@@ -30,6 +30,7 @@ export default function Accord() {
         <Image
           source={require("../../assets/images/accord.jpg")}
           style={styles.image}
+          resizeMode="cover"
         />
 
         {/* Car Details */}
@@ -65,6 +66,7 @@ export default function Accord() {
             <Image
               source={{ uri: "https://upload.wikimedia.org/wikipedia/en/7/7b/Honda_logo.svg" }}
               style={styles.logo}
+              resizeMode="contain"
             />
           </View>
 
@@ -123,7 +125,6 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: 200,
-    resizeMode: "cover",
   },
   detailsContainer: {
     padding: 20,

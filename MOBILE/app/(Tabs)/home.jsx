@@ -1,12 +1,32 @@
 import React, { useState, useContext } from "react";
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, TextInput, Alert } from "react-native";
-import { useRouter } from "expo-router"; // ✅ added this import
-import { AuthContext } from "../context/AuthContext";
+import { useRouter, useFocusEffect } from "expo-router"; // ✅ added this import
+import { Ionicons } from "@expo/vector-icons";
+import { AuthContext } from "../../context/AuthContext";
+import { getProducts } from "../../services/api";
 
 export default function Home() {
   const router = useRouter(); // ✅ initialize router for navigation
   const [activeTab, setActiveTab] = useState("Service");
   const { user } = useContext(AuthContext);
+  const [rentingCars, setRentingCars] = useState([]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (activeTab === "Renting" && user?.token) {
+        fetchRentingCars();
+      }
+    }, [activeTab, user])
+  );
+
+  const fetchRentingCars = async () => {
+    try {
+      const data = await getProducts(user?.token);
+      setRentingCars(data);
+    } catch (error) {
+      console.log("Error fetching renting cars:", error);
+    }
+  };
 
   const cars = [
     {
@@ -150,15 +170,25 @@ export default function Home() {
 
       {/* Cars Section */}
       <View style={styles.cars}>
-        {cars.map((car) => (
+        {(activeTab === "Renting" ? rentingCars : cars).map((car) => (
           <TouchableOpacity
-            key={car.id}
+            key={car.id || car._id} // Handle both static (id) and MongoDB (_id)
             style={styles.carCard}
             onPress={() => handleCarPress(car)}
           >
-            <Image source={car.image} style={styles.carImage} />
+            <Image
+              source={
+                activeTab === "Renting"
+                  ? { uri: car.image || 'https://via.placeholder.com/150' } // Dynamic backend image
+                  : car.image // Static require image
+              }
+              style={styles.carImage}
+              resizeMode="cover"
+            />
             <Text style={styles.carName}>{car.name}</Text>
-            <Text style={styles.carPrice}>{car.price}</Text>
+            <Text style={styles.carPrice}>
+              {activeTab === "Renting" ? `$${car.price} / ${car.unit || 'Hours'}` : car.price}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>

@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router"; // for navigation
-import { useFavorites } from "../context/FavoritesContext";
+import { useFavorites } from "../../context/FavoritesContext";
 
 export default function Huracan() {
   const router = useRouter();
@@ -30,6 +30,7 @@ export default function Huracan() {
         <Image
           source={require("../../assets/images/Huracan.jpg")}
           style={styles.image}
+          resizeMode="cover"
         />
 
         {/* Car Details */}
@@ -65,6 +66,7 @@ export default function Huracan() {
             <Image
               source={{ uri: "https://upload.wikimedia.org/wikipedia/en/6/6d/Lamborghini_Logo.svg" }}
               style={styles.logo}
+              resizeMode="contain"
             />
           </View>
 
@@ -119,7 +121,6 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: 200,
-    resizeMode: "cover",
   },
   detailsContainer: {
     padding: 20,

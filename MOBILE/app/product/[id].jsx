@@ -4,6 +4,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, TouchableOpacity, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router"; // Assuming you are using Expo Router
 import { AuthContext } from "../../context/AuthContext"; // Adjust path if needed
+import { useBookings } from "../../context/BookingsContext"; // Added for booking
 import { getProduct, deleteProduct } from "../../services/api"; // Adjust path if needed
 
 const DEFAULT_IMAGE = 'https://via.placeholder.com/300/0000FF/808080?text=No+Image';
@@ -11,6 +12,7 @@ const DEFAULT_IMAGE = 'https://via.placeholder.com/300/0000FF/808080?text=No+Ima
 export default function ProductDetails() {
     const { id } = useLocalSearchParams();
     const { user } = useContext(AuthContext);
+    const { addBooking } = useBookings(); // Added for booking
     const router = useRouter();
 
     const [product, setProduct] = useState(null);
@@ -37,8 +39,37 @@ export default function ProductDetails() {
         }
     };
 
-    const handleBooking = () => {
-        Alert.alert("Booking", `Feature coming soon for ${product?.name}!`);
+    const handleBooking = async () => {
+        if (!product) {
+            Alert.alert("Error", "Product information not found");
+            return;
+        }
+
+        const newBooking = {
+            carId: id, // Using product ID
+            carName: product.name,
+            date: new Date().toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' }),
+            price: `$${product.price} / ${product.unit || 'hr'}`,
+            image: null, // Backend accepts null
+        };
+
+        console.log("📦 Product booking data:", newBooking);
+
+        try {
+            console.log("🚀 Booking product...");
+            await addBooking(newBooking);
+            console.log("✅ Product booked successfully!");
+            console.log("👉 Navigating to /prof/booking");
+            // Navigate immediately
+            router.push("/prof/booking");
+            // Show success message after navigation
+            setTimeout(() => {
+                Alert.alert("Success", "Booking Confirmed!");
+            }, 100);
+        } catch (error) {
+            console.log("❌ Error booking product:", error);
+            Alert.alert("Error", `Failed to book: ${error.message}`);
+        }
     };
 
     const handleDelete = () => {

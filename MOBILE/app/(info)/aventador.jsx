@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router"; // ✅ Add this for back navigation
-import { useFavorites } from "../context/FavoritesContext";
+import { useFavorites } from "../../context/FavoritesContext";
 
 export default function Aventador() {
   const router = useRouter(); // ✅ Initialize router
@@ -30,6 +30,7 @@ export default function Aventador() {
         <Image
           source={require("../../assets/images/aventador.jpg")}
           style={styles.image}
+          resizeMode="cover"
         />
 
 
@@ -66,6 +67,7 @@ export default function Aventador() {
             <Image
               source={{ uri: "https://upload.wikimedia.org/wikipedia/en/6/6d/Lamborghini_Logo.svg" }}
               style={styles.logo}
+              resizeMode="contain"
             />
           </View>
 
@@ -120,7 +122,6 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: 200,
-    resizeMode: "cover",
   },
   detailsContainer: {
     padding: 20,

@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useFavorites } from "../context/FavoritesContext";
+import { useFavorites } from "../../context/FavoritesContext";
 
 export default function Audi() {
   const router = useRouter();
@@ -57,6 +57,7 @@ export default function Audi() {
             <Image
               source={{ uri: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Audi_logo_detail.svg" }}
               style={styles.logo}
+              resizeMode="contain"
             />
           </View>
 
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
   },
   container: { flex: 1, backgroundColor: "#0B1622" },
   header: { flexDirection: "row", justifyContent: "space-between", padding: 15, backgroundColor: "#14202E" },
-  image: { width: "100%", height: 200, resizeMode: "cover" },
+  image: { width: "100%", height: 200 },
   detailsContainer: { padding: 20 },
   carName: { color: "#fff", fontSize: 20, fontWeight: "bold" },
   rating: { flexDirection: "row", alignItems: "center", marginVertical: 5 },

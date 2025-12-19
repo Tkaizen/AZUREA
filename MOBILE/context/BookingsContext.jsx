@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
-import { API_URL } from '../services/api';
+import { API_URL, deleteBooking } from '../services/api';
 
 const BookingsContext = createContext();
 
@@ -35,17 +35,25 @@ export function BookingsProvider({ children }) {
     };
 
     const addBooking = async (bookingData) => {
+        console.log("📍 BookingsContext.addBooking called");
+        console.log("📍 User:", user ? "Logged in" : "Not logged in");
+        console.log("📍 Token:", user?.token ? "Exists" : "Missing");
+
         if (!user || !user.token) {
-            console.error("User not logged in");
+            console.error("❌ User not logged in");
             throw new Error("You must be logged in to book a car.");
         }
 
         // Optimistic update
         const tempId = Date.now().toString();
         const tempBooking = { ...bookingData, id: tempId, _id: tempId };
+        console.log("📍 Adding optimistic booking:", tempBooking);
         setBookings((prev) => [...prev, tempBooking]);
 
         try {
+            console.log("📍 Making POST request to:", `${API_URL}/bookings`);
+            console.log("📍 Request body:", JSON.stringify(bookingData, null, 2));
+
             const response = await fetch(`${API_URL}/bookings`, {
                 method: 'POST',
                 headers: {
@@ -55,21 +63,26 @@ export function BookingsProvider({ children }) {
                 body: JSON.stringify(bookingData),
             });
 
+            console.log("📍 Response status:", response.status);
+            console.log("📍 Response ok:", response.ok);
+
             if (response.ok) {
                 const newBooking = await response.json();
+                console.log("✅ Booking saved to backend:", newBooking);
                 // Replace temp booking with actual one from DB
                 setBookings((prev) => prev.map(b => b.id === tempId ? { ...newBooking, id: newBooking._id } : b));
                 // Reload to be sure
                 fetchBookings();
+                console.log("✅ addBooking completed successfully");
             } else {
                 // Revert on failure
                 setBookings((prev) => prev.filter(b => b.id !== tempId));
                 const errData = await response.json();
-                console.error("Failed to add booking:", errData.message);
+                console.error("❌ Failed to add booking:", errData.message);
                 throw new Error(errData.message || "Failed to add booking");
             }
         } catch (error) {
-            console.error("Error adding booking:", error);
+            console.error("❌ Error adding booking:", error);
             setBookings((prev) => prev.filter(b => b.id !== tempId));
             throw error;
         }
@@ -80,24 +93,16 @@ export function BookingsProvider({ children }) {
 
         // Optimistic update
         const oldBookings = [...bookings];
-        setBookings((prev) => prev.filter((item) => item.id !== id && item._id !== id));
+        setBookings((prev) => prev.filter((item) => item._id !== id));
 
         try {
-            const response = await fetch(`${API_URL}/bookings/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    Authorization: `Bearer ${user.token}`,
-                },
-            });
-
-            if (!response.ok) {
-                // Revert
-                setBookings(oldBookings);
-                console.error("Failed to delete booking");
-            }
+            await deleteBooking(id, user.token);
+            console.log("✅ Booking deleted successfully");
         } catch (error) {
             console.error("Error deleting booking:", error);
+            // Revert
             setBookings(oldBookings);
+            alert("Failed to delete booking: " + error.message);
         }
     };
 

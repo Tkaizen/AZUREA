@@ -17,17 +17,7 @@ export default function Booking() {
   const { bookings, removeBooking } = useBookings();
 
   const handleDone = (id) => {
-    Alert.alert(
-      "Complete Booking",
-      "Are you sure you want to mark this booking as done?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Yes",
-          onPress: () => removeBooking(id)
-        }
-      ]
-    );
+    removeBooking(id);
   };
 
   const getCarDetails = (item) => {
@@ -68,7 +58,7 @@ export default function Booking() {
       ) : (
         <FlatList
           data={bookings}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           renderItem={({ item }) => {
             const carDetails = getCarDetails(item);
 
@@ -96,7 +86,7 @@ export default function Booking() {
 
                     <TouchableOpacity
                       style={styles.doneButton}
-                      onPress={() => handleDone(item.id)}
+                      onPress={() => removeBooking(item._id)}
                     >
                       <Text style={styles.buttonText}>Done</Text>
                     </TouchableOpacity>

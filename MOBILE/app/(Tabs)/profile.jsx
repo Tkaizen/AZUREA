@@ -1,9 +1,9 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, Switch, Alert, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
-import { AuthContext } from "../context/AuthContext";
-import { useRouter } from "expo-router"; // 👈 import for navigation
-import React, { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useContext } from "react";
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { AuthContext } from "../../context/AuthContext";
+// 🚨 FIX: Import FontAwesome from expo/vector-icons
+import { FontAwesome } from "@expo/vector-icons";
 
 // Reusable Menu Item Component
 function MenuItem({ icon, title, onPress }) {
@@ -22,11 +22,13 @@ function MenuItem({ icon, title, onPress }) {
 
 // Main Profile Screen
 export default function Profile() {
-  const router = useRouter(); // 👈 initialize router
+  const router = useRouter();
   const { user, logout } = useContext(AuthContext);
 
   const handleLogout = async () => {
+    // 🚨 Ensure the logout function is fully implemented in AuthContext
     await logout();
+    // Redirect to the home/login screen after logout
     router.replace("/");
   };
 
@@ -35,6 +37,7 @@ export default function Profile() {
       {/* Profile Header */}
       <View style={styles.header}>
         <Image
+          // Assuming user.avatar, user.username, and user.email are correctly set during login
           source={{ uri: user?.avatar || "https://i.pravatar.cc/100" }}
           style={styles.avatar}
         />
@@ -44,12 +47,11 @@ export default function Profile() {
 
       {/* Menu Items */}
       <View style={styles.menu}>
+        {/* Navigation is correctly set up using router.push */}
         <MenuItem icon="car" title="My Bookings" onPress={() => router.push("/prof/booking")} />
-
         <MenuItem icon="heart" title="Favorites" onPress={() => router.push("/prof/favorites")} />
-        <MenuItem icon="credit-card" title="Payment Methods" />
+        <MenuItem icon="credit-card" title="Payment Methods" onPress={() => router.push("/prof/payment")} />
 
-        {/* 👇 Navigate to Settings when pressed */}
         <MenuItem
           icon="cog"
           title="Settings"
@@ -70,7 +72,7 @@ export default function Profile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0d1b2a", // Dark background
+    backgroundColor: "#0d1b2a",
   },
   header: {
     alignItems: "center",

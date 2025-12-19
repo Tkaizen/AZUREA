@@ -15,7 +15,7 @@ const host = getDevHost();
 // NOTE: You MUST replace this placeholder with your computer's actual IP
 // address assigned by the phone's hotspot (e.g., '192.168.43.10').
 // --- END OF REQUIRED FIX FOR TETHERING ---
-const resolvedHost = '169.254.132.29';
+const resolvedHost = '10.90.60.91';
 
 // Use your confirmed backend port: 3002
 export const API_URL = `http://${resolvedHost}:3002/api`;
@@ -155,6 +155,27 @@ export const deleteProduct = async (id, token) => {
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(`Status ${response.status}: ${errorData.message || 'Failed to delete product'}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const deleteBooking = async (id, token) => {
+    try {
+        const response = await fetch(`${API_URL}/bookings/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Status ${response.status}: ${errorData.message || 'Failed to delete booking'}`);
         }
 
         return await response.json();

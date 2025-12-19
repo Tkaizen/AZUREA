@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Modal, TextInput, Alert, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
-import { AuthContext } from "../context/AuthContext";
-import { getProducts, createProduct, deleteProduct, updateProduct } from "../services/api";
+import { AuthContext } from "../../context/AuthContext";
+import { getProducts, createProduct, deleteProduct, updateProduct } from "../../services/api";
 
 const DEFAULT_IMAGE = 'https://via.placeholder.com/150/0000FF/808080?text=No+Image';
 
@@ -117,75 +117,61 @@ export function Product() {
 
   const handleDeleteProduct = async (id) => {
     console.log("handleDeleteProduct called with ID:", id); // DEBUG LOG
-    Alert.alert(
-      "Confirm Delete",
-      "Are you sure you want to delete this product?",
-      [
-        { text: "Cancel", style: "cancel", onPress: () => console.log("Delete Cancelled") }, // DEBUG LOG
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            console.log("Delete Confirmed for ID:", id); // DEBUG LOG
-            try {
-              if (!user?.token) {
-                console.log("No token found"); // DEBUG LOG
-                Alert.alert("Error", "You must be logged in to delete products.");
-                return;
-              }
-              console.log("Calling deleteProduct API..."); // DEBUG LOG
-              await deleteProduct(id, user.token);
-              console.log("Delete Successful"); // DEBUG LOG
-              Alert.alert("Success", "Product deleted successfully");
-              fetchProducts(); // Refresh the list
-            } catch (error) {
-              console.error("Delete Error:", error);
-              Alert.alert("Error", `Failed to delete product: ${error.message}`);
-            }
-          }
-        }
-      ]
-    );
+
+    // Auth check
+    if (!user?.token) {
+      console.log("No token found"); // DEBUG LOG
+      Alert.alert("Error", "You must be logged in to delete products.");
+      return;
+    }
+
+    try {
+      console.log("Calling deleteProduct API..."); // DEBUG LOG
+      await deleteProduct(id, user.token);
+      console.log("Delete Successful"); // DEBUG LOG
+      // Optional: Show a quick toast or valid feedback if needed, but for now silent success/refresh
+      fetchProducts(); // Refresh the list
+    } catch (error) {
+      console.error("Delete Error:", error);
+      Alert.alert("Error", `Failed to delete product: ${error.message}`);
+    }
   };
 
   const renderProductItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.productItem}
-      onPress={() => router.push(`/product/${item._id}`)}
-      activeOpacity={0.7}
-    >
-      <Image
-        source={{ uri: item.image || DEFAULT_IMAGE }}
-        style={styles.productImage}
-      />
-      <View style={styles.productInfo}>
-        <Text style={styles.productName}>{item.name}</Text>
-        <Text style={styles.productPrice}>${item.price} / {item.unit}</Text>
-        <Text style={styles.productCategory}>Category: {item.category}</Text>
-      </View>
+    <View style={styles.productItem}>
+      <TouchableOpacity
+        style={styles.productContent}
+        onPress={() => router.push(`/product/${item._id}`)}
+        activeOpacity={0.7}
+      >
+        <Image
+          source={{ uri: item.image || DEFAULT_IMAGE }}
+          style={styles.productImage}
+        />
+        <View style={styles.productInfo}>
+          <Text style={styles.productName}>{item.name}</Text>
+          <Text style={styles.productPrice}>${item.price} / {item.unit}</Text>
+          <Text style={styles.productCategory}>Category: {item.category}</Text>
+        </View>
+      </TouchableOpacity>
 
       <View style={styles.actionButtons}>
         <TouchableOpacity
-          onPress={(e) => {
-            e.stopPropagation(); // Prevent navigating to details
-            handleEditProduct(item);
-          }}
+          onPress={() => handleEditProduct(item)}
           style={[styles.iconButton, styles.editButton]}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Text style={styles.iconButtonText}>✎</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={(e) => {
-            console.log("Delete button pressed for item:", item._id); // DEBUG LOG
-            e.stopPropagation(); // Prevent navigating to details
-            handleDeleteProduct(item._id);
-          }}
+          onPress={() => handleDeleteProduct(item._id)}
           style={[styles.iconButton, styles.deleteButton]}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Text style={styles.iconButtonText}>✖️</Text>
         </TouchableOpacity>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 
   if (!user?.token) {
@@ -401,12 +387,17 @@ const styles = StyleSheet.create({
   },
   productItem: {
     flexDirection: 'row',
-    padding: 15,
     backgroundColor: '#1b263b',
     borderRadius: 12,
     marginBottom: 10,
-    alignItems: 'center',
     elevation: 2,
+    overflow: 'hidden', // Ensure child views respect border radius
+  },
+  productContent: {
+    flex: 1,
+    flexDirection: 'row',
+    padding: 15,
+    alignItems: 'center',
   },
   productImage: {
     width: 60,
@@ -437,8 +428,9 @@ const styles = StyleSheet.create({
   actionButtons: {
     flexDirection: 'column',
     justifyContent: 'space-between',
-    paddingLeft: 10,
+    padding: 8,
     gap: 8,
+    justifyContent: 'center',
   },
   iconButton: {
     padding: 8,

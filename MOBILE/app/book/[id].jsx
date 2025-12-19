@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useBookings } from "../context/BookingsContext";
+import { useBookings } from "../../context/BookingsContext";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { carData } from "../data/carData";
+import { carData } from "../../data/carData";
 
 export default function BookCar() {
     const { id } = useLocalSearchParams();
@@ -14,24 +14,38 @@ export default function BookCar() {
     const car = carData[id];
 
     const handleConfirmBooking = async () => {
-        if (!car) return;
+        console.log("🔵 handleConfirmBooking started");
+        if (!car) {
+            console.log("❌ No car found");
+            Alert.alert("Error", "Car information not found");
+            return;
+        }
 
         const newBooking = {
-            id: Date.now().toString(),
             carId: id, // Save the ID for routing
             carName: car.name,
             date: new Date().toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' }),
             price: car.price,
-            image: car.image,
+            image: null, // Backend accepts null for image
         };
 
+        console.log("📦 Booking data prepared:", newBooking);
+
         try {
+            console.log("🚀 Calling addBooking...");
             await addBooking(newBooking);
-            Alert.alert("Success", "Booking Confirmed!", [
-                { text: "OK", onPress: () => router.push("/prof/booking") }
-            ]);
+            console.log("✅ Booking added successfully!");
+            console.log("👉 Navigating to /prof/booking");
+            // Navigate immediately
+            router.push("/prof/booking");
+            // Show success message after navigation
+            setTimeout(() => {
+                Alert.alert("Success", "Booking Confirmed!");
+            }, 100);
         } catch (error) {
-            Alert.alert("Error", `Failed to book car: ${error.message} `);
+            console.log("❌ Error adding booking:", error);
+            console.log("❌ Error message:", error.message);
+            Alert.alert("Error", `Failed to book car: ${error.message}`);
         }
     };
 
@@ -63,7 +77,7 @@ export default function BookCar() {
                 </View>
 
                 {/* Car Image */}
-                <Image source={car.image} style={styles.image} />
+                <Image source={car.image} style={styles.image} resizeMode="cover" />
 
                 {/* Car Details */}
                 <View style={styles.detailsContainer}>
@@ -134,7 +148,6 @@ const styles = StyleSheet.create({
     image: {
         width: "100%",
         height: 250,
-        resizeMode: "cover",
     },
     detailsContainer: {
         padding: 20,
